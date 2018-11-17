@@ -1,0 +1,53 @@
+{
+  "name": "sce_core",
+  "version": "4.0.1",
+  "description": "Forked from Project_MEANserver, this web application is the new SCE Core, a private Github Project. Based off of the MEAN stack, the software comes packaged with a NodeJS webserver (uses ExpressJS to handle routing/request processing), the SCE organization's home/web-services page, administrator dashboard, and members portal.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rjavier441/Project_MEANskills.git"
+  },
+  "keywords": [
+    "sce_core",
+    "SCE",
+    "sce",
+    "core",
+    "v4",
+    "4",
+    "Software",
+    "Computer",
+    "Engineering"
+  ],
+  "author": "rjavier441",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/SCE-Development/Core-v4/issues"
+  },
+  "homepage": "https://github.com/SCE-Development/Core-v4#readme",
+  "dependencies": {
+    "@material-ui/core": "^3.1.1",
+    "@material-ui/icons": "^3.0.1",
+    "body-parser": "^1.18.2",
+    "chai": "^4.1.2",
+    "chai-http": "^3.0.0",
+    "ejs": "^2.6.1",
+    "express": "^4.16.2",
+    "grunt-contrib-watch": "^1.0.0",
+    "jquery": "^3.2.1",
+    "material-ui": "^0.20.2",
+    "material-ui-icons": "^1.0.0-beta.36",
+    "mocha": "^4.1.0",
+    "mongodb": "^2.2.33",
+    "node_hash": "^0.2.0",
+    "react": "^16.5.2",
+    "react-dom": "^16.5.2",
+    "react-scripts": "^1.1.5"
+  },
+  "devDependencies": {
+    "grunt": "^1.0.1"
+  }
+}
