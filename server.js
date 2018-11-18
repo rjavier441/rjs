@@ -13,20 +13,19 @@
 "use strict"
 
 /* NodeJS+ExpressJS Server */
-var https = require("https");
-var fs = require("fs");
-var bodyParser = require("body-parser");					// import POST request data parser
-var settings = require("./util/settings");					// import server system settings
-var ssl = require(settings.security);						// import https ssl certifications
-var logger = require(`${settings.util}/logger`);			// import event log system
-var handles = require(`${settings.util}/route_handlers`);	// import URI endpoint handlers
+var https = require( "https" );
+var fs = require( "fs" );
+var bodyParser = require( "body-parser" );					// import POST request data parser
+var settings = require( "./util/settings" );				// import server system settings
+var ssl = require( settings.security );						// import https ssl certifications
+var logger = require( `${ settings.util }/logger` );		// import event log system
 var port = process.argv[2];									// allow custom ports
 
 /* Globals */
-var handlerTag = {"src": "server"};
+var handlerTag = { "src": "server" };
 var ssl_settings = {
-	"key": fs.readFileSync(ssl.prvkey),
-	"cert": fs.readFileSync(ssl.cert),
+	"key": fs.readFileSync( ssl.prvkey ),
+	"cert": fs.readFileSync( ssl.cert ),
 	"passphrase": ssl.passphrase,
 	"requestCert": false,
 	"rejectUnauthorized": false
@@ -35,14 +34,14 @@ var ssl_settings = {
 
 
 /* Initialize logging */
-logger.log(`Initializing...`, handlerTag);
+logger.log( `Initializing...`, handlerTag );
 
 
 
 /* Create server instance */
-const express = require("express");
+const express = require( "express" );
 const app = express();
-app.locals.title = "Core v4";
+app.locals.title = "rj_server";
 app.locals.email = "test@test.com";
 
 
@@ -54,37 +53,24 @@ logger.ignore( [
 	"error_formats.common"
 ] );
 
+
+
 /* Define Static Asset Locations (i.e. includes/js/css/img files) */
-logger.log(`Preparing static assets...`, handlerTag);
-app.use(bodyParser.json({							// support JSON-encoded request bodies
+logger.log( `Preparing static assets...`, handlerTag );
+app.use( bodyParser.json( {							// support JSON-encoded request bodies
 	strict: true
-}));
-app.use(bodyParser.urlencoded({						// support URL-encoded request bodies
+} ) );
+app.use( bodyParser.urlencoded( {					// support URL-encoded request bodies
 	extended: true
-}));
-app.use(express.static(settings.root));					// server root
-// app.use(express.static(`${settings.root}/home`));		// location of html files
-// app.use(express.static(`${settings.root}/home/css`));	// location of css files
-// app.use(express.static(`${settings.root}/home/js`));	// location of js files
-// app.use(express.static(`${settings.root}/core`));		// location of admin portal html
-// app.use(express.static(`${settings.root}/core/css`));	// location of admin portal css
-// app.use(express.static(`${settings.root}/core/js`));	// location of admin portal js
-// app.use(express.static(`${settings.root}/core/components/profiler`));	// location of admin portal profiler component js
-// app.use(express.static(`${settings.root}/core/components/doorcoder`));	// location of admin portal doorcoder component js
-// app.use(express.static(`${settings.root}/core/components/membership_manager`));	// location of admin portal membership_manager component js
-// app.use(express.static(`${settings.root}/../files`));   // added files folder to hold images and other media
+} ) );
+app.use( express.static( settings.root ) );			// server root (recursively include all)
 
 
-/* Define Main Server Routes (RESTful)
 
-	To create a new endpoint:
-		- Select a URI to associate as the new endpoint (i.e. "routePath")
-		- Define a handler function in util/route_handlers.js in a similar fashion the the others (i.e. "handlerFunc")
-		- Place an app request here (i.e. "app.post([routePath], [handlerFunc])")
-*/
-logger.log(`Routing server endpoints...`, handlerTag);
-var homeApp = require("./public/home/app/app.js");
-app.use("/home", homeApp);				// GET request of the main login page
+/* Define Main Server Route (RESTful) */
+logger.log( `Routing server endpoints...`, handlerTag );
+var homeApp = require( "./public/home/app/app.js" );
+app.use( "/", homeApp );				// GET request of the main login page
 
 
 
@@ -94,39 +80,25 @@ app.use( "/api", apiApp );
 
 
 
-/* Initialize SCE Core Admin sub-app */
-var coreAdminApp = require("./public/core/app/app.js");
-app.use("/core", coreAdminApp);
-
-
-
-/* Initialize MongoDB Test Page sub-app (will remove in production version) */
-var testPageApp = require("./test/app");
-app.use("/test", testPageApp);			// use a subapp to handle test page requests via the "/test" endpoint
-
-
-
 /* Initialize MongoDB Interface sub-app */
-var mdbiApp = require("./mdbi/app");
-app.use("/mdbi", mdbiApp);				// use a subapp to handle database requests via the "/mdbi" endpoint
+var mdbiApp = require( "./mdbi/app" );
+app.use( "/mdbi", mdbiApp );				// use a subapp to handle database requests via the "/mdbi" endpoint
 
 
 
 /*
 	Main Server Routine - Listen for requests on specified port
 */
-if (!port) {
-	logger.log(`Using default port ${settings.port}`, handlerTag);
+if ( !port ) {
+	logger.log( `Using default port ${ settings.port }`, handlerTag );
 	port = settings.port;
 } else {
-	logger.log(`Using custom port ${port}`, handlerTag);
+	logger.log( `Using custom port ${ port }`, handlerTag );
 	settings.port = port;
 }
-// app.listen(port, function () {
-// 	logger.log(`Now listening on port ${port}`, handlerTag);
-// });
-var server = https.createServer(ssl_settings, app);
-server.listen(port, function () {
-	logger.log(`Now listening on port ${port}`, handlerTag);
-});
+
+var server = https.createServer( ssl_settings, app );
+server.listen( port, function () {
+	logger.log( `Now listening on port ${ port }`, handlerTag );
+} );
 // END server.js 
