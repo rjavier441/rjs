@@ -67,13 +67,11 @@ app.use( express.static( settings.root ) );			// server root (recursively includ
 
 
 
-/* Define Main Server Route (RESTful) */
-logger.log( `Routing server endpoints...`, handlerTag );
-var homeApp = require( "./public/home/app/app.js" );
-app.use( "/", homeApp );				// GET request of the main login page
-
-
-
+/* Set Endpoints
+	Note: Endpoints are search in the order they are loaded. In this case, a request to the server
+	will attempt to resolve to the first endpoint loaded here, and then continue on until the end
+	of the endpoint list is reached (i.e. the last "app.use()" call).
+*/
 /* Initialize SCE Core API sub-app */
 var apiApp = require( "./api/app/app.js" );
 app.use( "/api", apiApp );
@@ -83,6 +81,19 @@ app.use( "/api", apiApp );
 /* Initialize MongoDB Interface sub-app */
 var mdbiApp = require( "./mdbi/app" );
 app.use( "/mdbi", mdbiApp );				// use a subapp to handle database requests via the "/mdbi" endpoint
+
+
+
+/* Initialize Skeleton sub-app */
+var skeletonApp = require( "./public/skeleton/app/app.js" );
+app.use( "/skeleton", skeletonApp );
+
+
+
+/* Define Main Server Route (RESTful) */
+logger.log( `Routing server endpoints...`, handlerTag );
+var homeApp = require( "./public/home/app/app.js" );
+app.use( "/", homeApp );				// GET request of the main login page
 
 
 
