@@ -38,7 +38,7 @@ app.use(bodyParser.urlencoded({		// support URL-encoded request bodies
 
 
 // Use the api route autoloader to load api routes in this file's directory
-autoloader.load( app, __dirname );
+autoloader.api.load( app, __dirname );
 // autoloader.load( app, [
 // 	{
 // 		"endpoint": "/user",

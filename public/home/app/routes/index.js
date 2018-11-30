@@ -37,6 +37,11 @@ var ssl_user_agent = new https.Agent({
 	"ca": fs.readFileSync(ssl.cert)
 });
 
+// Add static assets
+// TODO: Figure out why this is only needed for the requesting of the "/" endpoint's static files,
+// and not the other specifically defined endpoints
+router.use( "/css", express.static( `${ settings.root }/home/css` ) );
+
 
 
 // BEGIN Core Routes

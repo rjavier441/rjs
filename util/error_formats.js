@@ -113,7 +113,7 @@ error_formats.struct = {
 	},
 	"nonexistentEndpoint": {
 		"name": "CORE_NONEXISTENT_ENDPOINT",
-		"msg": "The requested API endpoint does not exist"
+		"msg": "The requested endpoint does not exist"
 	},
 	"expiredSession": {
 		"name": "CORE_SESSION_EXPIRED",
