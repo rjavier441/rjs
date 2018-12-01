@@ -8,14 +8,16 @@ Current Version: Alpha (v0.0.0)
 
 ## Table of Contents
 - [Setup and Dependencies](#setup-and-dependencies)
-  - [Linux/Mac](#on-linuxmac)
-  - [Windows](#on-windows)
+    - [Linux/Mac](#on-linuxmac)
+    - [Windows](#on-windows)
+
 - [Application Execution](#application-execution)
 - [Directory Structure](#directory-structure)
 - [System Block Diagram](#system-block-diagram)
 - [Using the MEANserver](#using-the-meanserver)
-  - [Endpoint Creation](#endpoint-creation)
-  - [Adding Webpages](#adding-webpages)
+    - [Endpoint Creation](#endpoint-creation)
+    - [Adding Webpages](#adding-webpages)
+
 - [Stable Endpoint Map](#stable-endpoint-map)
 - [Release Notes](#release-notes)
 
