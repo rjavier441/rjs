@@ -27,7 +27,7 @@ var fs = require( "fs" );
 // n/a
 
 // Container
-var autoloader = {
+const autoloader = {
 	"api": {},		// contains api endpoint loading logic
 	"route": {}		// contains route loading logic
 };
