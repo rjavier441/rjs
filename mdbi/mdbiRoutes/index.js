@@ -36,7 +36,7 @@ const ALL_COLLECTIONS = null;
 // BEGIN MongoDB client
 var mongo = require("mongodb").MongoClient;
 var mongoOptions = {
-	"appname": "SCE Core v4"
+	"appname": "rjs_mean"
 };
 var url = `mongodb://${encodeURIComponent(credentials.mdbi.user)}:${encodeURIComponent(credentials.mdbi.pwd)}@${mongo_settings.hostname}:${mongo_settings.port}/${mongo_settings.database}`;
 mongo.connect(url, mongoOptions, function (err, db) {
