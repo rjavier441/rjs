@@ -1,0 +1,15 @@
+{
+    "name": "autoIncrements",
+    "desc": "A collection that records the total number of insertions across all collections",
+    "members": {
+        "serverActivations": "number",
+		"Member": "number",
+		"MembershipData": "number",
+		"DoorCode": "number",
+		"clearanceLevel": "number",
+		"Ability": "number",
+		"SessionData": "number",
+		"Announcement": "number",
+		"OfficerApplication": "number"
+    }
+}

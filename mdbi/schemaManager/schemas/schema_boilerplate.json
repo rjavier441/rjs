@@ -1,0 +1,9 @@
+{
+    "name": "nameOfMongoDBCollection",
+    "desc": "An optional description string for the schema",
+    "members": {
+        "a": "a's data type",
+        "b": "b's data type"
+    },
+    "ppk": "a"
+}

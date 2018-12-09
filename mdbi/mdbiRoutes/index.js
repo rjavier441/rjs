@@ -14,7 +14,7 @@
 
 // BEGIN Includes
 var express = require("express");
-var assert = require("assert");
+// var assert = require("assert");
 var router = express.Router();
 var settings = require("../../util/settings");	// acquire server system settings
 var logger = require(`${settings.util}/logger`);	// acquire event log system
@@ -22,7 +22,9 @@ var mdb = require("../mongoWrapper");	// acquire MongoDB API Wrappers
 var credentials = require(settings.credentials);	// acquire db auth credentials
 var ef = require(`${settings.util}/error_formats`);	// acquire error formatter
 var mongo_settings = require("../mongo_settings");	// acquire MongoDB settings
+var schemaManager = require( "../schemaManager/schemaManager.js" );	// acquire schemaManager class
 var schema = require("../tools/schema_v0");	// acquire current db schema
+var sm = new schemaManager();
 // END Includes
 
 
@@ -57,6 +59,7 @@ mongo.connect(url, mongoOptions, function (err, db) {
 
 		// Verify necessary collections are present. If not, throw error
 		mdb.findCollections(null, function (error, list) {
+
 			// Compile collection names from "list"
 			var listOfNames = [];
 			for (var i = 0; i < list.length; i++) {
@@ -64,11 +67,12 @@ mongo.connect(url, mongoOptions, function (err, db) {
 			}
 
 			// Verify that the necessary collections are present
-			for (var i = 0; i < schema.collectionNames.length; i++) {
-				if (listOfNames.indexOf(schema.collectionNames[i]) === -1) {
-					logger.log(`Error: Collection ${schema.collectionNames[i]} not found`, handlerTag);
+			var schemaNames = sm.getSchemaNames();
+			for (var i = 0; i < schemaNames.length; i++) {
+				if (listOfNames.indexOf(schemaNames[i]) === -1) {
+					logger.log(`Error: Collection ${schemaNames[i]} not found`, handlerTag);
 					endSession(db);
-					throw new Error(`Collection ${schema.collectionNames[i]} not found`);
+					throw new Error(`Collection ${schemaNames[i]} not found`);
 				}
 			}
 
