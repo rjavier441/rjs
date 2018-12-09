@@ -6,5 +6,5 @@
         "password": "string",
         "loginCount": "number"
     },
-    "ppk": "a"
+    "ppk": "username"
 }

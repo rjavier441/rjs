@@ -282,6 +282,58 @@ describe( "schemaManager", function() {
 			done();
 		} );
 	} );
+
+	// @test			schemaManager.getSchemaNames
+	// @description		?
+	describe( "schemaManager.getSchemaNames()", function() {
+
+		// Set the names of all expected schemas
+		var expected = [ "testSchema1", "testSchema2" ];
+
+		// Initialize a schema manager
+		var sm = new schemaManager( __dirname );
+
+		// Load schemas into the schemaManager, pointed to by config file
+		sm.load();
+
+		it( "should return both schema names", function( done ) {
+
+			var actual = sm.getSchemaNames();
+			assert.isArray( actual );
+			assert.sameMembers( actual, expected );
+			done();
+		} );
+	} );
+
+	// @test			schemaManager.getPpks
+	// @description		?
+	describe( "schemaManager.getPpks()", function() {
+
+		// Load the ppks of the sample schemas
+		var testSchema1 = JSON.parse( fs.readFileSync( __dirname + "/schemas/testSchema1.json", {
+			"encoding": "utf8"
+		} ) );
+		var testSchema2 = JSON.parse( fs.readFileSync( __dirname + "/schemas/testSchema2.json", {
+			"encoding": "utf8"
+		} ) );
+		var ppks = {
+			"testSchema1": typeof testSchema1.ppk === "undefined" ? "__docId__" : testSchema1.ppk,
+			"testSchema2": typeof testSchema2.ppk === "undefined" ? "__docId__" : testSchema2.ppk
+		};
+
+		// Initialize a schema manager
+		var sm = new schemaManager( __dirname );
+
+		// Load schemas into the schemaManager, pointed to by config file
+		sm.load();
+
+		it( "should return both schema's preferred primary keys", function( done ) {
+
+			var actual = sm.getPpks();
+			assert.deepEqual( actual, ppks );
+			done();
+		} );
+	} );
 } );
 // END schemaManager
 

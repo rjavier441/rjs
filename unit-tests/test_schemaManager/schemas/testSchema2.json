@@ -5,6 +5,5 @@
         "info": "string",
         "sessionData": "object",
         "userId": "number"
-    },
-    "ppk": "a"
+    }
 }

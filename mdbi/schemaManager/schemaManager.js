@@ -203,6 +203,45 @@ schemaManager.prototype.getSchemas = function( name ) {
 	return this.schema;
 };
 
+// @function		getSchemaNames()
+// @description		This function retrieves the names of all loaded schemas
+// @parameters		n/a
+// @returns			(array) names		An array of strings representing the names of loaded
+//										schemas
+schemaManager.prototype.getSchemaNames = function() {
+
+	// Traverse through all loaded schemas
+	var names = [];
+	var me = this;
+	Object.keys( this.schema ).forEach( function( key ) {
+
+		// Record the name of this loaded schema object
+		names.push( me.schema[ key ].name );
+	} );
+
+	// Return array of loaded schema names
+	return names;
+};
+
+// @function		getPpks()
+// @description		This function retrieves the preferred primary keys of all loaded schemas
+// @parameters		n/a
+// @returns			(object) ppks		A JSON object whose keys are schema names and whose values
+//										are the ppk of their corresponding schema
+schemaManager.prototype.getPpks = function() {
+
+	// Traverse through the list of schema objects
+	var ppks = {};
+	var me = this;
+	Object.keys( this.schema ).forEach( function( schemaName ) {
+
+		ppks[schemaName] = me.schema[schemaName].ppk;
+	} );
+
+	// Return list
+	return ppks;
+};
+
 // @function		checkConformity()
 // @description		This function checks the conformity of a JSON object to the schema name. This
 //					function does this by forwarding the conformity check to the appropriate mdbi
