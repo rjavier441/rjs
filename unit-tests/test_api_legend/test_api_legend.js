@@ -16,8 +16,8 @@ var fs = require("fs");
 var ejs = require("ejs");
 var chai = require("chai");
 var assert = chai.assert;
-var al = require("../util/api_legend");
-const ApiLegend = require( "../util/class/ApiLegend/ApiLegend.js" );		// class ApiLegend
+var al = require("../../util/api_legend");
+const ApiLegend = require( "../../util/class/ApiLegend/ApiLegend.js" );		// class ApiLegend
 
 
 
@@ -165,7 +165,7 @@ describe ( "API Legend", function () {
 	// @description		?
 	describe ( "getDoc()", function () {
 
-		var docTemplatePath = __dirname + "/../util/class/ApiLegend/template/docTemplate.ejs";
+		var docTemplatePath = __dirname + "/../../util/class/ApiLegend/template/docTemplate.ejs";
 		var options = {
 			"filename": docTemplatePath,
 			"cache": true,

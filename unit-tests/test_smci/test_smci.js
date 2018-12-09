@@ -12,9 +12,9 @@
 
 // Includes
 var chai = require("chai");
-var smci = require("../smci/smci");
-var smci_settings = require("../smci/smci_settings");
-var www = require("../util/www.js");
+var smci = require("../../smci/smci");
+var smci_settings = require("../../smci/smci_settings");
+var www = require("../../util/www.js");
 var assert = chai.assert;
 
 

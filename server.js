@@ -81,7 +81,7 @@ app.use( "/api", apiApp );
 
 
 /* Initialize MongoDB Interface sub-app */
-var mdbiApp = require( "./mdbi/app" );
+var mdbiApp = require( "./mdbi/app" );		// intended as a DBAL (not a web/rest api)
 app.use( "/mdbi", mdbiApp );				// use a subapp to handle database requests via the "/mdbi" endpoint
 
 
