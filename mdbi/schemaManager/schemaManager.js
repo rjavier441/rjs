@@ -26,8 +26,8 @@ const collectionSchema = require( "./class/mdbiCollectionSchema.js" );
 // @members			(object) config		A JSON object that contains configuration settings. It may
 //										contain any of the following members:
 //							(string) path		The path to the directory containing schema
-//												description files. This path is loaded relative
-//												to this file
+//												description files. This path is must be a valid
+//												path relative to the config file, itself
 //					(~array) ignore		An array containing the names of schema description files
 //										to ignore when loading schemas
 // @note			See "mdbiCollectionSchema.js" for documentation describing how to format
@@ -45,16 +45,16 @@ const collectionSchema = require( "./class/mdbiCollectionSchema.js" );
 // @class			schemaManager
 // @description		This class serves as a means for the MDBI (and virtually any other module) to
 //					load schemas into memory for representation, modification, and creation
-// @ctor args		(~string) path		A string representing a path to a schema_config.json file.
-//										If omitted, this defaults to "./" (i.e. the same directory
-//										containing this file)
+// @ctor args		(~string) path		A string representing a path to a directory containing a
+//										schema_config.json file. If omitted, this defaults to the
+//										same directory containing this file
 class schemaManager {
 
 	// ctor
-	constructor( path = "./" ) {
+	constructor( path = __dirname ) {
 
 		// Store the config file path here
-		this.configFile = path;
+		this.configFileDir = path;
 
 		// Store the config object here
 		this.config = {};
@@ -67,7 +67,7 @@ class schemaManager {
 	}
 }
 
-// @function		load
+// @function		load()
 // @description		This function searches in the designated schema directory (configured by the
 //					"schema_config.json" file) for schema definition json files. Any files that
 //					are found will have their schema definitions (see documentation located in
@@ -87,21 +87,23 @@ schemaManager.prototype.load = function() {
 		var msg = "Load Result:\n";
 
 		// Load configuration file at the specified path
-		logger.log( `Loading schema "${this.configFile}"...`, handlerTag );
-		var obj = JSON.parse( fs.readFileSync( `${__dirname}/${this.configFile}`, {
+		logger.log( `Loading schema config "${this.configFileDir}/schema_config.json"...`, handlerTag );
+		var obj = JSON.parse( fs.readFileSync( `${this.configFileDir}/schema_config.json`, {
 			"encoding": "utf8"
 		} ) );
 		this.config = typeof obj.config === "undefined" ? {} : obj.config;
 		this.ignore = typeof obj.ignore === "undefined" ? [] : obj.ignore;
 
 		// Then, acquire schema definition filenames from the specified path
+		logger.log( `Loading schema descriptions from "${this.configFileDir}/${this.config.path}"...`, handlerTag );
 		if( this.config.path ) {
 			
 			// Acquire schema definition filenames
 			var schemaFilenames = [];
-			schemaFilenames = fs.readdirSync( this.config.path, {
+			schemaFilenames = fs.readdirSync( `${this.configFileDir}/${this.config.path}`, {
 				"encoding": "utf8"
 			} );
+			logger.log( `Found files ${schemaFilenames}...`, handlerTag );
 
 			// Traverse the list of ignores
 			this.ignore.forEach( function( fileToIgnore ) {
@@ -110,11 +112,13 @@ schemaManager.prototype.load = function() {
 				if( schemaFilenames.includes( fileToIgnore ) ) {
 
 					// If it is, remove it from the files to load
+					logger.log( `Ignoreing ${fileToIgnore}...`, handlerTag );
 					schemaFilenames.splice( schemaFilenames.indexOf( fileToIgnore ), 1 );
 				}
 			} );
 
 			// Traverse the list of schema definition files
+			var me = this;
 			schemaFilenames.forEach( function( filename ) {
 
 				// Execute and catch any errors
@@ -122,16 +126,16 @@ schemaManager.prototype.load = function() {
 
 					// Load the individual file's json schema definition
 					var schema = JSON.parse(
-						fs.readFileSync( `${__dirname}/${this.config.path}/${filename}`, {
+						fs.readFileSync( `${me.configFileDir}/${me.config.path}/${filename}`, {
 							"encoding": "utf8"
 						} )
 					);
 
 					// Store the schema definition in memory
-					this.loaded[ schema.name ] = schema;
+					me.loaded[ schema.name ] = schema;
 
 					// Create a new mdbiCollectionSchema object and store it in the schema list
-					this.schema[ schema.name ] = new collectionSchema( schema );
+					me.schema[ schema.name ] = new collectionSchema( schema );
 
 					// Update the result message
 					msg += `${filename} load success\n`;
@@ -148,7 +152,7 @@ schemaManager.prototype.load = function() {
 		} else {
 
 			// Log error, but do not stop server execution
-			logger.log( `Error: No path specified in config file "${this.configFile}"`, handlerTag );
+			logger.log( `Error: No path specified in config file "${this.configFileDir}/schema_config.json"`, handlerTag );
 		}
 	} catch( error ) {
 
@@ -157,7 +161,18 @@ schemaManager.prototype.load = function() {
 	}
 };
 
-// @function		checkConformity
+// @function		getSchemaDefinition()
+// @description		This function returns a collection schema object of the given name
+// @parameters		(string) name		The name of the schema to request
+// @returns			(object) schema		If the schema was loaded, this function returns the loaded
+//										schema JSON object. Otherwise, an empty object is returned
+schemaManager.prototype.getSchemaDefinition = function( name ) {
+
+	// console.log( "TEST:", this.loaded[name] );
+	return typeof this.loaded[name] === "undefined" ? {} : this.loaded[name];
+};
+
+// @function		checkConformity()
 // @description		This function checks the conformity of a JSON object to the schema name. This
 //					function does this by forwarding the conformity check to the appropriate mdbi
 //					collection schema object's "checkConformity()" function.
@@ -179,4 +194,7 @@ schemaManager.prototype.checkConformity = function( name, item ) {
 };
 // END class schemaManager
 
+
+
+module.exports = schemaManager;
 // END schemaManager.js
