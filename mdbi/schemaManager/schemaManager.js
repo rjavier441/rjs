@@ -162,14 +162,45 @@ schemaManager.prototype.load = function() {
 };
 
 // @function		getSchemaDefinition()
-// @description		This function returns a collection schema object of the given name
+// @description		This function gets the schema definition JSON with the given schema name
 // @parameters		(string) name		The name of the schema to request
-// @returns			(object) schema		If the schema was loaded, this function returns the loaded
+// @returns			(object) schemaDef	If the schema was loaded, this function returns the loaded
 //										schema JSON object. Otherwise, an empty object is returned
 schemaManager.prototype.getSchemaDefinition = function( name ) {
 
 	// console.log( "TEST:", this.loaded[name] );
 	return typeof this.loaded[name] === "undefined" ? {} : this.loaded[name];
+};
+
+// @function		getSchemaDefinitions()
+// @description		This function gets all collection schema definition JSONs that have been
+//					successfully loaded
+// @parameters		n/a
+// @returns			(object) schemaDefs	A JSON object whose keys are schema names and whose values
+//										are collection schema objects
+schemaManager.prototype.getSchemaDefinitions = function() {
+
+	return this.loaded;
+};
+
+// @function		getSchema()
+// @description		This function retrieves the mdbiCollectionSchema object of the given name
+// @parameters		(string) name		The name of the schema object to acquire
+// @returns			(object) schemaObj	The mdbiCollectionSchema object of the given "name", or an
+//										empty object if the schema "name" did not exist or load
+schemaManager.prototype.getSchema = function( name ) {
+
+	return typeof this.schema[name] === "undefined" ? {} : this.schema[name];
+};
+
+// @function		getSchemas()
+// @description		This function retrieves the mdbiCollectionSchema objects of all loaded schemas
+// @parameters		n/a
+// @returns			(object) schemaObjs	A JSON object whose keys are schema names and whose values
+//										are mdbiCollectionSchema objects that have been loaded
+schemaManager.prototype.getSchemas = function( name ) {
+
+	return this.schema;
 };
 
 // @function		checkConformity()

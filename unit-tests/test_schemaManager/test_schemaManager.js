@@ -171,6 +171,117 @@ describe( "schemaManager", function() {
 			done();
 		});
 	} );
+
+	// @test			schemaManager.getSchemaDefinition
+	// @description		?
+	describe( "schemaManager.getSchemaDefinition()", function() {
+
+		// Acquire all schema definition objects manually
+		var testSchema1 = JSON.parse( fs.readFileSync( __dirname + "/schemas/testSchema1.json", {
+			"encoding": "utf8"
+		} ) );
+
+		// Initialize a schema manager
+		var sm = new schemaManager( __dirname );
+
+		// Load schemas into the schemaManager, pointed to by config file
+		sm.load();
+
+		it( "should return the schema definition object for testSchema1", function( done ) {
+
+			assert.deepEqual( sm.getSchemaDefinition( "testSchema1" ), testSchema1 );
+			done();
+		} );
+	} );
+
+	// @test			schemaManager.getSchemaDefinitions
+	// @description		?
+	describe( "schemaManager.getSchemaDefinitions()", function() {
+
+		// Acquire all schema definition objects manually
+		var definitions = {};
+		definitions.testSchema1 = JSON.parse( fs.readFileSync( __dirname + "/schemas/testSchema1.json", {
+			"encoding": "utf8"
+		} ) );
+		definitions.testSchema2 = JSON.parse( fs.readFileSync( __dirname + "/schemas/testSchema2.json", {
+			"encoding": "utf8"
+		} ) );
+
+		// Initialize a schema manager
+		var sm = new schemaManager( __dirname );
+
+		// Load schemas into the schemaManager, pointed to by config file
+		sm.load();
+
+		it( "should return schema definition objects for both schemas", function( done ) {
+
+			var actual = sm.getSchemaDefinitions();
+			assert.deepEqual( actual, definitions );
+			assert.deepEqual( actual.testSchema1, definitions.testSchema1 );
+			assert.deepEqual( actual.testSchema2, definitions.testSchema2 );
+			done();
+		} );
+	} );
+
+	// @test			schemaManager.getSchema
+	// @description		?
+	describe( "schemaManager.getSchema()", function() {
+
+		// Acquire all schema definition objects manually
+		var definitions = {};
+		definitions.testSchema1 = JSON.parse( fs.readFileSync( __dirname + "/schemas/testSchema1.json", {
+			"encoding": "utf8"
+		} ) );
+		definitions.testSchema2 = JSON.parse( fs.readFileSync( __dirname + "/schemas/testSchema2.json", {
+			"encoding": "utf8"
+		} ) );
+
+		// Initialize a schema manager
+		var sm = new schemaManager( __dirname );
+
+		// Load schemas into the schemaManager, pointed to by config file
+		sm.load();
+
+		it( "should return testSchema1's mdbiCollectionSchema object", function( done ) {
+
+			var actual = sm.getSchema( "testSchema1" );
+			assert.deepEqual( actual, new mdbiCollectionSchema( definitions.testSchema1 ) );
+			done();
+		} );
+
+		it( "should return testSchema2's mdbiCollectionSchema object", function( done ) {
+
+			var actual = sm.getSchema( "testSchema2" );
+			assert.deepEqual( actual, new mdbiCollectionSchema( definitions.testSchema2 ) );
+			done();
+		} );
+	} );
+	
+	// @test			schemaManager.getSchemas
+	// @description		?
+	describe( "schemaManager.getSchemas()", function() {
+
+		// Acquire all schema definition objects manually
+		var definitions = {};
+		definitions.testSchema1 = new mdbiCollectionSchema( JSON.parse( fs.readFileSync( __dirname + "/schemas/testSchema1.json", {
+			"encoding": "utf8"
+		} ) ) );
+		definitions.testSchema2 = new mdbiCollectionSchema( JSON.parse( fs.readFileSync( __dirname + "/schemas/testSchema2.json", {
+			"encoding": "utf8"
+		} ) ) );
+
+		// Initialize a schema manager
+		var sm = new schemaManager( __dirname );
+
+		// Load schemas into the schemaManager, pointed to by config file
+		sm.load();
+
+		it( "should return mdbiCollectionSchema objects for both schemas", function( done ) {
+
+			assert.deepEqual( sm.getSchemas(), definitions );
+			done();
+		} );
+	} );
 } );
 // END schemaManager
 

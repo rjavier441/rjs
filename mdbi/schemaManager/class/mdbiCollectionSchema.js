@@ -18,10 +18,21 @@ var settings = require( "../../../util/settings.js" );
 
 
 // BEGIN schema definition documentation
-// @config			schema definitions (aka schema description files)
-// @description		Schema definitions are stored in JSON files, and take the form identical to
-//					that of mdbiCollectionSchema instances. Inherently, they look much like the
-//					example provided below:
+// @config			Schema Definitions (aka schema description files)
+// @description		Schema definitions are stored in JSON files, and take the form of JSON objects
+//					identical to that of mdbiCollectionSchema instances. Consequently, they look
+//					much like the example provided below.
+// @members			(string) name		The name of the collection this schema definition
+//										describes
+//					(~string) desc		An optional description of the schema
+//					(object) members	A JSON object whose keys are document field names for a
+//										BSON document that will be inserted into the database.
+//										Each key's value is a string describing the data type of
+//										field.
+//					(~string) ppk		The name of a member within the "members" object to use as
+//										a ppk (preferred primary key) for the collection. If
+//										omitted, it is assumed that the collection will use
+//										"__docId__" as its primary key for all documents
 // @example
 //					Contents of a typcial schema definition file named "myCollection.json":
 //
