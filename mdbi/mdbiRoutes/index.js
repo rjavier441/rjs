@@ -23,7 +23,6 @@ var credentials = require(settings.credentials);	// acquire db auth credentials
 var ef = require(`${settings.util}/error_formats`);	// acquire error formatter
 var mongo_settings = require("../mongo_settings");	// acquire MongoDB settings
 var schemaManager = require( "../schemaManager/schemaManager.js" );	// acquire schemaManager class
-var schema = require("../tools/schema_v0");	// acquire current db schema
 var sm = new schemaManager();
 // END Includes
 
@@ -53,8 +52,10 @@ mongo.connect(url, mongoOptions, function (err, db) {
 		throw err;	// throw error only after error logging was successful
 	} else {
 		logger.log("Connected to Mongo", handlerTag);
-
-		// First, acquire link to database
+		
+		// First, acquire link to database and load schema
+		sm.load();
+		logger.log( `Loaded schemas: ${sm.getSchemaNames()}`, handlerTag );
 		mdb.database = db;
 
 		// Verify necessary collections are present. If not, throw error

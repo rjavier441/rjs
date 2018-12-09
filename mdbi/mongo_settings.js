@@ -30,7 +30,7 @@ mongo_settings.port = "27017";
 	@member 	database
 	@details 	The string name of the database to connect to
 */
-mongo_settings.database = "sce_core";
+mongo_settings.database = "rjs";
 // END members
 
 // Freeze object
