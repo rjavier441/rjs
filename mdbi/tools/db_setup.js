@@ -240,8 +240,9 @@ function initDatabase() {
 			// Acquire descriptions of the schemas and views to apply
 			var schemas = sm.getSchemaDefinitions();	// views are also represented as schemas
 
-			// Generate schema initialization promises
+			// Generate schema/view initialization promises
 			var schemaPromises = [];
+			var viewPromises = [];
 			Object.keys( schemas ).forEach( function( schemaName ) {
 
 				// Determine action based on schema type
@@ -249,6 +250,11 @@ function initDatabase() {
 				if( schemaDef.type === "view" ) {
 
 					// TODO: Generate a view creation promise
+					viewPromises.push( getViewCreatorPromise(
+						schemaDef.name,
+						db,
+						schemaDef
+					) );
 				} else {
 
 					// Generate a collection creation promise and store it
@@ -260,12 +266,21 @@ function initDatabase() {
 				}
 			} );
 
-			// Run schema promises and evaluate results
+			// Run schema/view promises and evaluate results
 			Promise.all( schemaPromises ).then( function( message ) {
 				
-				// End with success
-				console.log( `Successfully initialized database "${mongo_settings.database}"...` );
-				endSession( db );
+				// Run view promises (since views require schemas to exist first)
+				Promise.all( viewPromises ).then( function( message ) {
+					
+					// End with success
+					console.log( `Successfully initialized database "${mongo_settings.database}"...` );
+					endSession( db );
+				} ).catch( function( error ) {
+
+					// End with failure
+					console.log( `Failed to apply view(s): ${error}` );
+					if( db ) endSession( db );
+				} );
 			} ).catch( function( error ) {
 
 				// End with failure
@@ -371,6 +386,52 @@ function getCollectionCreatorPromise( name, db, doc ) {
 				resolve();
 			}
 		} );
+	} );
+}
+
+// @function		getViewCreatorPromise()
+// @description		This function creates a view initialization Promise that simply creates
+//					the specified view with the given properties.
+// @parameters		(string) name		The name of the view to create
+//					(object) db			The MongoDB database object provided to the callback of
+//										"mongo.connect()"
+//					(object) schemaDef	The schema definition object of the view to create
+// @returns			(Promise) p			A promise that creates the specified view
+function getViewCreatorPromise( name, db, schemaDef ) {
+
+	return new Promise( function( resolve, reject ) {
+
+		// Create a view creation command with the given properties
+		var viewCreationCommand = {
+			"create": name,
+			"viewOn": schemaDef.view.source,
+			"pipeline": schemaDef.view.pipeline
+		};
+
+		// Attempt to execute the view creation command; this may fail if the user doesn't have
+		// the appropriate database privileges/roles
+		try {
+			db.command( viewCreationCommand, null, function( error, result ) {
+
+				// Check for errors
+				if( error ) {
+
+					// End with failure
+					console.log( `Error creating view "${name}: ${error}` );
+					reject();
+				} else {
+
+					// End with success
+					console.log( `Created view "${name}"...` );
+					resolve();
+				}
+			} );
+		} catch( e ) {
+
+			// Handle any exception
+			console.log( `Error executing view creation command: ${e}` );
+			reject();
+		}
 	} );
 }
 
