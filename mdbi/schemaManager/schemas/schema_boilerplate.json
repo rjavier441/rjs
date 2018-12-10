@@ -1,5 +1,6 @@
 {
-    "name": "nameOfMongoDBCollection",
+	"name": "nameOfCollection",
+	"type": "[collection|view]",
     "desc": "An optional description string for the schema",
     "members": {
         "a": "a's data type",

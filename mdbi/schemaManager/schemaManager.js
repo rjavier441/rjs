@@ -5,7 +5,8 @@
 // 	Last Modified: 	December ?, 2018
 // 	Details:
 // 					This file contains software that provides various functions and utilities for
-//					the MDBI to manage collection schemas and enforce collection schema conformity
+//					the MDBI to manage collection schemas, enforce collection schema conformity
+//					and manage the presence of MongoDB views.
 // 	Dependencies:
 // 					MongoDB v3.4+
 
@@ -64,6 +65,8 @@ class schemaManager {
 
 		// Store the loaded schemas' mdbiCollectionSchema objects here
 		this.schema = {};
+
+		// TODO: Determine how to support MongoDB database views using the schema manager
 	}
 }
 

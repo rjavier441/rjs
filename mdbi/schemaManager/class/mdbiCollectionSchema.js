@@ -4,9 +4,9 @@
 // 	Date Created: 	December 2, 2018
 // 	Last Modified: 	December 2, 2018
 // 	Details:
-// 					This file contains a utility class that represents a collection schema.
+// 					This file contains a utility class that represents a collection schema/view.
 //					This class is used in tandem with the schemaManager to represent or modify
-//					existing collection schemas, or create new ones.
+//					existing collection schemas/views, or create new ones.
 // 	Dependencies:
 // 					MongoDB v3.4+
 
@@ -24,6 +24,15 @@ var settings = require( "../../../util/settings.js" );
 //					much like the example provided below.
 // @members			(string) name		The name of the collection this schema definition
 //										describes
+//					(~string) type		An optional string that describes the schema type. Valid
+//										values include "collection" and "view".
+//					(~object) view		A JSON object only required if the schema "type" is a
+//										"view". It describes the following view properties:
+//							(string) source		The name of the collection that this view will
+//												initially read from. The collection MUST exist.
+//							(array) pipeline	The aggregation pipeline commands used to generate
+//												the view. See MongoDB View and Aggregation
+//												Documentation for more details.
 //					(~string) desc		An optional description of the schema
 //					(object) members	A JSON object whose keys are document field names for a
 //										BSON document that will be inserted into the database.
@@ -37,13 +46,14 @@ var settings = require( "../../../util/settings.js" );
 //					Contents of a typcial schema definition file named "myCollection.json":
 //
 //						{
-//							"name": "myCollection"
-//							"desc": "This is a test schema definition for a test collection"
+//							"name": "myCollection",
+//							"type": "collection",
+//							"desc": "This is a test schema definition for a test collection",
 //							"members": {
 //								"a": "string",
 //								"b": "number",
 //								"c": "object",
-//							}
+//							},
 //							"ppk": "a"
 //						}
 // BEGIN schema definition documentation
@@ -60,6 +70,19 @@ var settings = require( "../../../util/settings.js" );
 //										about the schema. It takes the following parameters:
 //							(string) name		The name of the collection described by this
 //												collection schema
+//							(~string) type		An optional string that describes the schema type.
+//												Valid values include "collection" and "view". If
+//												omitted, this defaults to "collection".
+//							(~object) view		A JSON object only required if the schema "type"
+//												is a "view". It describes the following view
+//												properties:
+//									(string) source		The name of the collection that this view
+//														will initially read from. The collection
+//														MUST exist.
+//									(array) pipeline	The aggregation pipeline commands used to
+//														generate the view. See MongoDB View and
+//														Aggregation Documentation for more
+//														details.
 //							(~string) desc		An optional description of the collection
 //							(object) members	A JSON object whose members are objects describing
 //												the member name and its corresponding data type.
@@ -71,6 +94,20 @@ var settings = require( "../../../util/settings.js" );
 // @example
 //					var template = {
 //						"name": "user_info",
+//						"type": "view",
+//						"view": {
+//							"source": "userCollection",
+//							"pipeline": [
+//								{
+//									"$lookup": {
+//										"from": "userAccounts",
+//										"localField": "userId",
+//										"foreignField": "accountNumber",
+//										"as": "user_acct_num"
+//									}
+//								}
+//							]
+//						},
 //						"members": {
 //							"dateOfBirth": "string",	// datetime string
 //							"bio": "string",
@@ -87,6 +124,8 @@ class mdbiCollectionSchema {
 	constructor ( template ) {
 
 		this.name = typeof template.name === "undefined" ? "" : template.name;
+		this.type = typeof template.type !== "string" ? "collection" : template.type;
+		this.view = this.type !== "view" ? undefined : template.view;
 		this.desc = typeof template.desc === "undefined" ? "" : template.desc;
 		this.members = ( typeof template.members !== "object" || Array.isArray( template.members ) ) ?
 			{} : template.members;
