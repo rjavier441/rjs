@@ -68,7 +68,7 @@ var settings = require( "../../../util/settings.js" );
 //					for an entire database. Keep this distinction in mind.
 // @ctor args		(~object) template	An optional object that configures general information
 //										about the schema. It takes the following parameters:
-//							(string) name		The name of the collection described by this
+//							(string) name		The name of the collection/view described by this
 //												collection schema
 //							(~string) type		An optional string that describes the schema type.
 //												Valid values include "collection" and "view". If
@@ -83,6 +83,16 @@ var settings = require( "../../../util/settings.js" );
 //														generate the view. See MongoDB View and
 //														Aggregation Documentation for more
 //														details.
+//							(~object) textIndex	A JSON object that is only valid if the schema
+//												"type" is a "collection". If specified, this
+//												object indicates that the collection is
+//												text-indexed (see MongoDB's Text Indexes
+//												documentation). It contains the following members:
+//									(string) iname		The name to give to the text index
+//									(array) fields		An array containing the names of fields
+//														that are indexed in this schema (see
+//														MongoDB's documentation for details on
+//														indexable fields).
 //							(~string) desc		An optional description of the collection
 //							(object) members	A JSON object whose members are objects describing
 //												the member name and its corresponding data type.
@@ -126,6 +136,7 @@ class mdbiCollectionSchema {
 		this.name = typeof template.name === "undefined" ? "" : template.name;
 		this.type = typeof template.type !== "string" ? "collection" : template.type;
 		this.view = this.type !== "view" ? undefined : template.view;
+		this.textIndex = this.type !== "collection" ? undefined : template.textIndex;
 		this.desc = typeof template.desc === "undefined" ? "" : template.desc;
 		this.members = ( typeof template.members !== "object" || Array.isArray( template.members ) ) ?
 			{} : template.members;

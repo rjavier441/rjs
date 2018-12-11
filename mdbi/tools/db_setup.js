@@ -249,17 +249,16 @@ function initDatabase() {
 				var schemaDef = schemas[ schemaName ];
 				if( schemaDef.type === "view" ) {
 
-					// TODO: Generate a view creation promise
+					// Generate a view creation promise
 					viewPromises.push( getViewCreatorPromise(
-						schemaDef.name,
-						db,
-						schemaDef
+						schemaDef,
+						db
 					) );
 				} else {
 
 					// Generate a collection creation promise and store it
 					schemaPromises.push( getCollectionCreatorPromise(
-						schemaDef.name,
+						schemaDef,
 						db,
 						generatePlaceholder( schemaDef )
 					) );
@@ -361,29 +360,50 @@ function generatePlaceholder( def ) {
 // @function		getCollectionCreatorPromise()
 // @description		This function creates a collection initialization Promise that simply creates
 //					the specified collection with the given placeholder document.
-// @parameters		(string) name		The name of the collection to create
+// @parameters		(string) schemaDef	The schema definition object of the collection to create
 //					(object) db			The MongoDB database object provided to the callback of
 //										"mongo.connect()"
 //					(object) doc		The document to insert as a placeholder
 // @returns			(Promise) p			A promise that creates the specified collection
-function getCollectionCreatorPromise( name, db, doc ) {
+function getCollectionCreatorPromise( schemaDef, db, doc ) {
 
 	return new Promise( function( resolve, reject ) {
 
 		// Create the collection and insert the placeholder document
-		db.collection( name ).insertOne( doc, null, function( error, result ) {
+		db.collection( schemaDef.name ).insertOne( doc, null, function( error, result ) {
 
 			// Check for errors
 			if( error ) {
 
 				// Log error and end with failure
-				console.log( `Error creating collection "${name}": ${error}` );
+				console.log( `Error creating collection "${schemaDef.name}": ${error}` );
 				reject();
 			} else {
 
-				// End with success
-				console.log( `Created collection "${name}": ${result}` );
-				resolve();
+				// Check if the collection requires a text-index
+				if( schemaDef.type === "collection" && schemaDef.textIndex ) {
+
+					// Create a text index with the specified settings
+					defineTextIndex( db, schemaDef, function( err, res ) {
+
+						// Check for errors
+						if( err ) {
+
+							// End with error
+							console.log( `Created collection "${schemaDef.name}" (${result}), but failed to create text-index "${schemaDef.textIndex.iname}" (${err})` );
+						} else {
+
+							// End with success
+							console.log( `Created collection "${schemaDef.name}" (${result}) with text-index "${schemaDef.textIndex.iname}" (${res})` );
+							resolve();
+						}
+					} );
+				} else {
+
+					// End with success
+					console.log( `Created collection "${schemaDef.name}": ${result}` );
+					resolve();
+				}
 			}
 		} );
 	} );
@@ -392,18 +412,18 @@ function getCollectionCreatorPromise( name, db, doc ) {
 // @function		getViewCreatorPromise()
 // @description		This function creates a view initialization Promise that simply creates
 //					the specified view with the given properties.
-// @parameters		(string) name		The name of the view to create
+// @parameters		(object) schemaDef	The schema definition object of the view to create. This
+//										MUST be of type "view"
 //					(object) db			The MongoDB database object provided to the callback of
 //										"mongo.connect()"
-//					(object) schemaDef	The schema definition object of the view to create
 // @returns			(Promise) p			A promise that creates the specified view
-function getViewCreatorPromise( name, db, schemaDef ) {
+function getViewCreatorPromise( schemaDef, db ) {
 
 	return new Promise( function( resolve, reject ) {
 
 		// Create a view creation command with the given properties
 		var viewCreationCommand = {
-			"create": name,
+			"create": schemaDef.name,
 			"viewOn": schemaDef.view.source,
 			"pipeline": schemaDef.view.pipeline
 		};
@@ -417,12 +437,12 @@ function getViewCreatorPromise( name, db, schemaDef ) {
 				if( error ) {
 
 					// End with failure
-					console.log( `Error creating view "${name}: ${error}` );
+					console.log( `Error creating view "${schemaDef.name}: ${error}` );
 					reject();
 				} else {
 
 					// End with success
-					console.log( `Created view "${name}"...` );
+					console.log( `Created view "${schemaDef.name}"...` );
 					resolve();
 				}
 			} );
@@ -433,6 +453,40 @@ function getViewCreatorPromise( name, db, schemaDef ) {
 			reject();
 		}
 	} );
+}
+
+// @function		defineTextIndex()
+// @description		This function creates a text index for a set of fields in an existing
+//					collection, thereby enabling partial text searches with db.collection().find()
+//					using the "{ "$text": { "$search": ... } }" filter;
+// @parameters		(object) db			The MongoDB database object provided to the callback of
+//										"mongo.connect()"
+//					(object) schemaDef	The schema definition object of the collection whose text
+//										index will be created. This object MUST have the member
+//										"textIndex" defined.
+//					(function) cb		A callback function that runs after the index creation is
+//										attempted. It takes the following arguments:
+//							(object) error		If an error occurred, this is a MongoError object,
+//												otherwise it is null
+//							(object) result		If an error occurred, this is null, otherwise it
+//												is an object detailing the operation's results
+function defineTextIndex( db, schemaDef, cb ) {
+	
+	// Create a place to store the text index fields and settings
+	var indexFields = {};
+	var indexSettings = {
+		"name": schemaDef.textIndex.iname
+	};
+
+	// Traverse the list of index fields
+	schemaDef.textIndex.fields.forEach( function( fieldName ) {
+
+		// Specify the field "fieldName" index as a "text" index
+		indexFields[ fieldName ] = "text";
+	} );
+
+	// Attempt to create the text index for the given collection
+	db.collection( schemaDef.name ).createIndex( indexFields, indexSettings, cb );
 }
 
 // @function		endSession()
