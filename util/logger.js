@@ -27,7 +27,7 @@ const logger = {};
 	@member 	logger.logHeader
 	@details 	This member defines the heading prepended to each logfile's filename.
 */
-logger.logHeader = "__scelog__";
+logger.logHeader = "__rjs-log__";
 
 /*
 	@member 	logger.fileMutex
