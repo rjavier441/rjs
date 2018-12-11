@@ -14,7 +14,9 @@
 // Includes
 var chai = require("chai");
 var assert = chai.assert;
-var format = require("../util/error_formats");
+var settings = require( "../../util/settings" );
+var logger = require( `${settings.util}/logger` );
+var format = require("../../util/error_formats");
 
 
 
@@ -22,6 +24,9 @@ var format = require("../util/error_formats");
 var tcontorl = {
 	runAll: true
 };
+
+// Ignore messages from error_formats during this unit test
+logger.ignore(["error_formats.common"]);
 
 
 
@@ -36,21 +41,21 @@ describe("Error Formats", function () {
 		}
 
 		it("should return a type member if only given a type", function (done) {
-			var expectedKeys = ["etype"];
+			var expectedKeys = ["etype", "success", "timestamp"];
 			var result = format.common(type);
 
 			assert.hasAllKeys(result, expectedKeys);
 			done();
 		});
 		it("should return a type and msg if given them", function (done) {
-			var expectedKeys = ["etype", "emsg"];
+			var expectedKeys = ["etype", "emsg", "success", "timestamp" ];
 			var result = format.common(type, msg);
 
 			assert.hasAllKeys(result, expectedKeys);
 			done();
 		});
 		it("should return a type, msg, and obj if given them", function (done) {
-			var expectedKeys = ["etype", "emsg", "eobj"];
+			var expectedKeys = ["etype", "emsg", "eobj", "success", "timestamp" ];
 			var result = format.common(type, msg, obj);
 
 			assert.hasAllKeys(result, expectedKeys);

@@ -1,0 +1,9 @@
+{
+    "name": "testSchema2",
+    "desc": "This is test schema #2",
+    "members": {
+        "info": "string",
+        "sessionData": "object",
+        "userId": "number"
+    }
+}

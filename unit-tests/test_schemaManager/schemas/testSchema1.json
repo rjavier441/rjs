@@ -1,0 +1,10 @@
+{
+    "name": "testSchema1",
+    "desc": "This is test schema #1",
+    "members": {
+        "username": "string",
+        "password": "string",
+        "loginCount": "number"
+    },
+    "ppk": "username"
+}

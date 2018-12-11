@@ -13,7 +13,9 @@
 // Includes
 var settings = require("../util/settings");         // import server system settings
 var schema = require("./tools/schema_v0");			// import database schema
+var schemaManager = require( "./schemaManager/schemaManager" );	// import schemaManager class
 var logger = require(`${settings.util}/logger`);    // import event log system
+var sm = new schemaManager();						// initialize a schema manager
 var ef = require(`${settings.util}/error_formats`); // import error formatting system
 var cu = require(`${settings.util}/custom_utility`);// import custom utilities
 
@@ -80,12 +82,16 @@ mdb.insertDoc = function (collection, doc, callback, options = undefined) {
 					// Else, no error occurred, and the database collection was found; Append the unique sequential id
 					doc[ "__docId__" ] = incrementVal;
 
+					// Determine whether a ppk is specified for this collection
+					var collectionPpk = sm.getPpks()[collection];
+					var hasPpk = collectionPpk === "__docId__" ? false : true;
+
 					// If a ppk is specified for this collection
-					if ( typeof schema.ppk[ collection ] !== "undefined" && modifiers.preserveKey !== true ) {
+					if ( hasPpk && modifiers.preserveKey !== true ) {
 
 						// Set the ppk (preferred primary key) of this document to the value of the docId
 						logger.log( `Overwriting ppk using __docId__ ${doc[ "__docId__" ]}...`, handlerTag );
-						doc[ schema.ppk[ collection ] ] = doc[ "__docId__" ];
+						doc[ collectionPpk ] = doc[ "__docId__" ];
 					}
 					
 					// Write to the database
