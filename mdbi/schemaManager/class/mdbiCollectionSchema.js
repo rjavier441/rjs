@@ -33,6 +33,14 @@ var settings = require( "../../../util/settings.js" );
 //							(array) pipeline	The aggregation pipeline commands used to generate
 //												the view. See MongoDB View and Aggregation
 //												Documentation for more details.
+//					(~object) textIndex	A JSON object that is only valid if the schema "type" is a
+//										"collection". If specified, this object indicates that the
+//										collection is text-indexed (see MongoDB's Text Indexes
+//										documentation). It contains the following members:
+//							(string) iname		The name to give to the text index
+//							(array) fields		An array containing the names of fields that are
+//												indexed in this schema (see MongoDB's
+//												documentation for details on indexable fields).
 //					(~string) desc		An optional description of the schema
 //					(object) members	A JSON object whose keys are document field names for a
 //										BSON document that will be inserted into the database.
@@ -42,6 +50,11 @@ var settings = require( "../../../util/settings.js" );
 //										a ppk (preferred primary key) for the collection. If
 //										omitted, it is assumed that the collection will use
 //										"__docId__" as its primary key for all documents
+//					(~array) mock		An array of documents that will serve as "mock" data (i.e.
+//										test documents conforming to the schema that, when placed,
+//										can be useful in simulating the use of the collection
+//										described by this schema). Note that this is only valid if
+//										the schema "type" is a "collection".
 // @example
 //					Contents of a typcial schema definition file named "myCollection.json":
 //
@@ -54,7 +67,11 @@ var settings = require( "../../../util/settings.js" );
 //								"b": "number",
 //								"c": "object",
 //							},
-//							"ppk": "a"
+//							"ppk": "a",
+//							"mock": [
+//								{ "a": "hello", "b": 0, "c": { "key": "val" } },
+//								{ "a": "world", "b": 1, "c": { "another key": " another val" } }
+//							]
 //						}
 // BEGIN schema definition documentation
 
@@ -101,6 +118,12 @@ var settings = require( "../../../util/settings.js" );
 //												collection. If omitted, it is assumed that the
 //												collection will use "__docId__" as its primary key
 //												for all documents
+//							(~array) mock		An array of documents that will serve as "mock"
+//												data (i.e. test documents conforming to the schema
+//												that, when placed, can be useful in simulating the
+//												use of the collection described by this schema).
+//												Note that this is only valid if the schema "type"
+//												is a "collection".
 // @example
 //					var template = {
 //						"name": "user_info",
@@ -141,6 +164,7 @@ class mdbiCollectionSchema {
 		this.members = ( typeof template.members !== "object" || Array.isArray( template.members ) ) ?
 			{} : template.members;
 		this.ppk = typeof template.ppk !== "string" ? "__docId__" : template.ppk;
+		this.mock = this.type !== "collection" ? undefined : template.mock;
 	}
 }
 

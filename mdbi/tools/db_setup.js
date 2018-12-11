@@ -23,6 +23,7 @@ var fs = require( "fs" );
 var schemaManager = require( "../schemaManager/schemaManager" );	// acquire schemaManager class
 var settings = require("../../util/settings");
 var logger = require( `${settings.util}/logger` );
+var ef = require( `${settings.util}/error_formats` );
 var credentials = require(settings.credentials).mdbi;
 var cryptic = require(`${settings.util}/cryptic`);
 var syskey = require(settings.credentials).syskey;
@@ -40,8 +41,12 @@ var url = `mongodb://${ encodeURIComponent(credentials.user) }:${ encodeURICompo
 
 
 // BEGIN Main Logic
-// Ignore logger messages from the schema manager
-logger.ignore( ["schemaManager.load()"] );
+// Ignore logger messages from the schema manager and auto incrementer routine
+logger.ignore( [
+	// "schemaManager.load()",
+	"mongoWrapper.autoIncrement",
+	"error_formats.common"
+] );
 
 // Load database schemas using the schema manager
 sm.load();
@@ -59,6 +64,10 @@ if( args.includes("--stats") ) {
 
 	// If an init is requested, run the schema init routine
 	initDatabase();
+} else if( args.includes("--mock") ) {
+
+	// If a mock init is requested, run the schema init routine with mocking enabled
+	initDatabase( true );
 } else {
 
 	// Otherwise, print a help prompt
@@ -215,9 +224,13 @@ function formatDatabase() {
 
 // @function		initDatabase()
 // @description		This function contains database initialization logic
-// @parameters		n/a
+// @parameters		(~boolean) mock		A boolean that controls whether to add any "fake" data to
+//										each collection that has the "mock" member specified (see
+//										mdbi/schemaManager/class/mdbiCollectionSchema.js source
+//										code documentation for more details on the "mock" member).
+//										If omitted, this defaults to false.
 // @returns			n/a
-function initDatabase() {
+function initDatabase( mock = false ) {
 
 	// First, connect to the database
 	console.log( "Connecting to MongoDB Server..." );
@@ -240,9 +253,11 @@ function initDatabase() {
 			// Acquire descriptions of the schemas and views to apply
 			var schemas = sm.getSchemaDefinitions();	// views are also represented as schemas
 
-			// Generate schema/view initialization promises
+			// Generate schema/view initialization promises, and any pretend data insertion
+			// promises.
 			var schemaPromises = [];
 			var viewPromises = [];
+			var mockPromises = [];
 			Object.keys( schemas ).forEach( function( schemaName ) {
 
 				// Determine action based on schema type
@@ -263,17 +278,45 @@ function initDatabase() {
 						generatePlaceholder( schemaDef )
 					) );
 				}
+
+				// Determine if mock promises are requested and mock data is defined in the schema
+				if( mock && Array.isArray( schemaDef.mock ) ) {
+
+					// TODO: Generate a mock promise
+					mockPromises.push( getCollectionMockPromise(
+						sm.getSchema( schemaName ),
+						db
+					) );
+				}
 			} );
 
-			// Run schema/view promises and evaluate results
+			// Run schema promises and evaluate results
 			Promise.all( schemaPromises ).then( function( message ) {
 				
-				// Run view promises (since views require schemas to exist first)
+				// Run view promises next (since views require schemas to exist first)
 				Promise.all( viewPromises ).then( function( message ) {
 					
-					// End with success
-					console.log( `Successfully initialized database "${mongo_settings.database}"...` );
-					endSession( db );
+					// Check for mock promises
+					if( mockPromises.length > 0 ) {
+
+						// Run mock promises (if any)
+						Promise.all( mockPromises ).then( function( message ) {
+
+							// End with success
+							console.log( `Successfully initialized database "${mongo_settings.database}" with mock documents...` );
+							endSession( db );
+						} ).catch( function( error ) {
+
+							// End with failure
+							console.log( `Successfully initialized database "${mongo_settings.database}", but encountered errors when inserting mock documents...` );
+							if( db ) endSession( db );
+						} );
+					} else {
+
+						// End with success
+						console.log( `Successfully initialized database "${mongo_settings.database}"...` );
+						endSession( db );
+					}
 				} ).catch( function( error ) {
 
 					// End with failure
@@ -360,7 +403,7 @@ function generatePlaceholder( def ) {
 // @function		getCollectionCreatorPromise()
 // @description		This function creates a collection initialization Promise that simply creates
 //					the specified collection with the given placeholder document.
-// @parameters		(string) schemaDef	The schema definition object of the collection to create
+// @parameters		(object) schemaDef	The schema definition object of the collection to create
 //					(object) db			The MongoDB database object provided to the callback of
 //										"mongo.connect()"
 //					(object) doc		The document to insert as a placeholder
@@ -409,6 +452,67 @@ function getCollectionCreatorPromise( schemaDef, db, doc ) {
 	} );
 }
 
+// @function		getCollectionMockPromise()
+// @description		This function creates a collection mock data insertion Promise that simply
+//					inserts the specified mock data into the specified existing collection.
+// @parameters		(object) schema		The mdbiCollectionSchema object of the collection to
+//										insert into
+//					(object) db			The MongoDB database object provided to the callback of
+//										"mongo.connect()"
+// @returns			(Promise) p			A promise that inserts the schema's test document set
+function getCollectionMockPromise( schema, db ) {
+
+	return new Promise( function( resolve, reject ) {
+
+		// First, check if all mock documents conform to the schema
+		var conforms = true;
+		schema.mock.forEach( function( doc ) {
+
+			// If conformity check fails, mark as a failure
+			if( !schema.checkConformity( doc ) ) conforms = false;
+		} );
+
+		// Determine next course of action based on conformity
+		if( conforms ) {
+
+			// Attempt to insert all mock documents
+			db.collection( schema.name ).insertMany( schema.mock, function( err, res ) {
+
+				// Check for errors
+				if( err ) {
+					
+					// End with failure
+					console.log( `Failed to insert mock documents for collection "${schema.name}": ${err}` );
+					reject();
+				} else {
+
+					// Attempt to auto-increment the corresponding collection
+					autoIncrement( schema.name, function( error, result ) {
+
+						// Check for errors
+						if( error ) {
+
+							// End with failure
+							console.log( `Inserted mock documents for collection "${schema.name}" (${res}), but failed to update auto-increment record (${error})` );
+							reject();
+						} else {
+
+							// End with success
+							console.log( `Inserted mock documents for collection "${schema.name}" (${res}) and updated auto-increment record (${result})` );
+							resolve();
+						}
+					}, schema.mock.length );
+				}
+			} );
+		} else {
+
+			// End with failure
+			console.log( `Error: Conformity check failed for 1 or more mock documents in collection "${schema.name}"` );
+			reject();
+		}
+	} );
+}
+
 // @function		getViewCreatorPromise()
 // @description		This function creates a view initialization Promise that simply creates
 //					the specified view with the given properties.
@@ -451,6 +555,66 @@ function getViewCreatorPromise( schemaDef, db ) {
 			// Handle any exception
 			console.log( `Error executing view creation command: ${e}` );
 			reject();
+		}
+	} );
+}
+
+// @function		autoIncrement()
+// @description		This function increments the specified collection by cnt, or 1 if cnt is
+//					omitted
+// @parameters		(string) collection	The name of the MongoDB collection to auto-increment
+//					(function) callback	A callback function to run after auto-incrementing. It is
+//										passed two arguments:
+//							(object) error		An error-formatted object if an error occurred;
+//												otherwise, this is null
+//							(number) result		The current value of the collection's auto-
+//												increment record
+//					(~number) cnt		The number to increment by. If omitted, this defaults to 1
+// @returns			n/a
+function autoIncrement ( collection, callback, cnt = 1 ) {
+	var handlerTag = { "src": "mongoWrapper.autoIncrement" };
+	var query = {
+		"$inc": {}
+	};
+	query.$inc[collection] = cnt;	// increment the collection aincmt by "cnt"
+	mdb.database.collection( "autoIncrements" ).updateOne( {
+		"autoIncrements": 0
+	}, query ).then( function ( mongoResult ) {
+
+		// Determine what to do after the auto increment
+		if ( mongoResult.modifiedCount !== 1 ) {
+
+			// Log the error and pass it to callback
+			var emsg = `Error auto-incrementing: ${mongoResult}`;
+			logger.log( emsg, handlerTag );
+			callback( ef.asCommonStr( ef.struct.mdbiNoEffect, {
+				"msg": emsg
+			} ) , null );
+		} else {
+
+			// Acquire the value of the set number
+			mdb.database.collection( "autoIncrements" ).findOne( {
+				"autoIncrements": 0
+			} ).then( function ( result, error ) {
+
+				// Check for errors
+				if ( error ) {
+
+					// Log the error
+					var emsg = `Error acquiring autoIncrements snapshot: ${error}`;
+					logger.log( emsg , handlerTag );
+
+					// Pass it to the callback
+					callback( JSON.parse( ef.asCommonStr( ef.struct.mdbiReadError, {
+						"msg": emsg
+					} ) ), null );
+				} else {
+					
+					// Run callback and give it the new value of the auto incremented record
+					// logger.log( JSON.stringify(result), handlerTag );	// DEBUG
+					callback( null, result[ collection ] );
+				}
+			} );
 		}
 	} );
 }
