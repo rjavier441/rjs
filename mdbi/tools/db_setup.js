@@ -13,6 +13,7 @@
 // 	Dependencies:
 //					mongo_settings.js
 // 					MongoDB v3.4.x+
+// TODO: Make server activations and autoincrement managed by this script or the schema manager class (We don't want users to have to manually add these collections, and update the autoincrementer's schema file whenever they add a new schema definition JSON file)
 
 "use strict"
 
@@ -282,7 +283,7 @@ function initDatabase( mock = false ) {
 				// Determine if mock promises are requested and mock data is defined in the schema
 				if( mock && Array.isArray( schemaDef.mock ) ) {
 
-					// TODO: Generate a mock promise
+					// Generate a mock promise
 					mockPromises.push( getCollectionMockPromise(
 						sm.getSchema( schemaName ),
 						db
