@@ -292,13 +292,14 @@ autoloader.api.linkRoutes = function ( app, path ) {
 	// Filter out the dirs to ignore, if any
 	if ( Array.isArray( dirsToIgnore ) && dirsToIgnore.length > 0 ) {
 
-		// Traverse the dirs array in search of any directories to ignore
-		dirs.forEach( function( dir, index ) {
-			
-			// If the current dir is in the directories to ignore
-			if ( dirsToIgnore.indexOf( dir ) !== -1 ) {
+		// Traverse the dirsToIgnore array in search of any directories in dirs to ignore
+		dirsToIgnore.forEach( function( dir ) {
 
-				// Remove it from the dir list
+			// Check if the current directory is in the dirs list
+			var index = dirs.indexOf( dir );
+			if( index !== -1 ) {
+
+				// Remove the dir from the dirs array
 				dirs.splice( index, 1 );
 			}
 		} );
