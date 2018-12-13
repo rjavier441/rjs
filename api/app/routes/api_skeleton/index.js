@@ -14,7 +14,7 @@
 // Includes (include as many as you need; the bare essentials are included here)
 var express = require("express");
 var https = require("https");
-// var fs = require("fs");
+var fs = require("fs");
 var router = express.Router();
 var settings = require("../../../../util/settings");	// import server system settings
 var al = require(`${settings.util}/api_legend.js`);		// import API Documentation Module
