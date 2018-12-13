@@ -60,7 +60,7 @@ router.get( "/", function ( request, response ) {
 
 	// Log the access to this endpoint
 	var handlerTag = { "src": "rootHandler" };
-	logger.log( `Server root requested from client @ ip ${ request.ip }`, handlerTag );
+	logger.log( `Server root requested from client @ ip ${ request.ip }\nRaw Headers:${ request.rawHeaders }`, handlerTag );
 	logger.log( request.toString(), handlerTag );
 
 	// Send a response to the request
@@ -90,7 +90,7 @@ router.use(function (request, response) {
 
 	// Log 404 error
 	var handlerTag = {"src": "/NOTFOUND"};
-	logger.log(`Non-existent endpoint "${request.path}" requested from client @ ip ${request.ip}` ,handlerTag);
+	logger.log(`Non-existent endpoint "${request.path}" requested from client @ ip ${request.ip}\nRaw Headers:${ request.rawHeaders }` ,handlerTag);
 
 	// Send 404 response
 	response.status( 404 ).send( ef.asCommonStr(
@@ -111,7 +111,7 @@ router.use(function (err, request, response) {
 	
 	// Log 500 error
 	var handlerTag = {"src": "/ERROR"};
-	logger.log(`Error occurred with request from client @ ip ${request.ip}`);
+	logger.log(`Error occurred with request from client @ ip ${request.ip}\nRaw Headers:${ request.rawHeaders }`);
 
 	// Send 500 response
 	response.status( 500 ).send( ef.asCommonStr(
