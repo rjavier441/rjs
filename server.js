@@ -13,6 +13,7 @@
 "use strict"
 
 /* NodeJS+ExpressJS Server */
+var minimist = require( "minimist" );						// import easy command line arg reader
 var https = require( "https" );
 var fs = require( "fs" );
 var bodyParser = require( "body-parser" );					// import POST request data parser
@@ -20,9 +21,11 @@ var settings = require( "./util/settings" );				// import server system settings
 var ssl = require( settings.security );						// import https ssl certifications
 var logger = require( `${ settings.util }/logger` );		// import event log system
 var autoloader = require( `${settings.util}/route_autoloader` );
-var port = process.argv[2];									// allow custom ports
 
 /* Globals */
+var margs = minimist( process.argv.slice( 2 ) );			// acquire all args except "node" &
+															// "server"
+var port = margs.port ? margs.port : margs.P ? margs.P : false;		// allow custom ports
 var handlerTag = { "src": "server" };
 var ssl_settings = {
 	"key": fs.readFileSync( ssl.prvkey ),
@@ -34,8 +37,25 @@ var ssl_settings = {
 
 
 
-/* Initialize logging */
-console.log( fs.readFileSync( `${settings.util}/common/startup.txt` ).toString() );
+/* Check for help option */
+if( margs.h || margs.help ) {
+
+	// Show help prompt and leave
+	help();
+	return;
+} else {
+
+	// Show startup text by itself
+	console.log( "\n" + fs.readFileSync( `${settings.util}/common/startup.txt` ).toString() );
+}
+
+
+
+/* Initialize logging (and check if verbose logging is requested) */
+if( !margs.v && !margs.verbose ) {
+	console.log( `Running in non-verbose logging mode...` );
+	logger.logToConsole = false;
+}
 logger.log( `Initializing...`, handlerTag );
 
 
@@ -118,4 +138,20 @@ var server = https.createServer( ssl_settings, app );
 server.listen( port, function () {
 	logger.log( `Now listening on port ${ port }`, handlerTag );
 } );
+
+/* Help Prompt */
+function help() {
+	console.log( "\n" + fs.readFileSync( `${settings.util}/common/startup.txt` ).toString() );
+	console.log( `rjserver Help Prompt` );
+	console.log( `\nCommand Synopsis:` );
+	console.log( `\n\tnode server.js [options]` );
+	console.log( `\nOptions:` );
+	console.log( `\n\t-h, --help` );
+	console.log( `\n\t\tShows this help prompt` );
+	console.log( `\n\t-P, --port` );
+	console.log( `\n\t\tSets the server port to a number other than the default "8080"` );
+	console.log( `\n\t-v, --verbose` );
+	console.log( `\n\t\tEnables verbose logging to console. Logging to log files is done regardless` );
+	console.log( `\n\t` );
+}
 // END server.js 
