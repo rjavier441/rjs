@@ -179,11 +179,10 @@ This project was built in the Ubuntu Xenial 16.04 LTS Linux environment, and was
 ---
 
 ## Release Notes
-
 - Alpha (_completed_)
-  - Restructuring relevant server modules for general-purpose web/api server use (_completed_)
-  - ~Adding various database tools (i.e. db setup script, db mock data insertion, etc.)~ (_completed_)
-  - Revamping MDBI to use automatic schema loading and configuration (_completed_)
-  - Need to add facilities for Database Schema constraints to enforce BSON document conformity per collection (_completed_)
+    - ~Restructuring relevant server modules for general-purpose web/api server use~ (_completed_)
+    - ~Adding various database tools (i.e. db setup script, db mock data insertion, etc.)~ (_completed_)
+    - ~Revamping MDBI to use automatic schema loading and configuration~ (_completed_)
+    - ~Need to add facilities for Database Schema constraints to enforce BSON document conformity per collection~ (_completed_)
 - Beta
-  - Determining new features list soon...
+    - Determining new features list soon...
