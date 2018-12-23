@@ -2,7 +2,7 @@
 
 This repository houses a server package meant to run on either a MEAN or MERN stack
 
-Current Version: Alpha (v0.0.0)
+Current Version: v0.1.0 (Beta)
 
 ---
 
