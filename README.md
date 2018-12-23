@@ -7,6 +7,7 @@ Current Version: Alpha (v0.0.0)
 ---
 
 ## Table of Contents
+
 - [Setup and Dependencies](#setup-and-dependencies)
     - [Linux/Mac](#on-linuxmac)
     - [Windows](#on-windows)
@@ -25,6 +26,7 @@ Current Version: Alpha (v0.0.0)
 
 ## Setup and Dependencies
 This project was built in the Ubuntu Xenial 16.04 LTS Linux environment, and was built on
+
 - Node.js v8.9.1+
 - ExpressJS NPM package v4.16.2+
 - EJS Embedded JS Templates v2.6.1+
@@ -177,8 +179,11 @@ This project was built in the Ubuntu Xenial 16.04 LTS Linux environment, and was
 ---
 
 ## Release Notes
-- Alpha
-  - Restructuring relevant server modules for general-purpose web/api server use
+
+- Alpha (_completed_)
+  - Restructuring relevant server modules for general-purpose web/api server use (_completed_)
   - ~Adding various database tools (i.e. db setup script, db mock data insertion, etc.)~ (_completed_)
-  - Revamping MDBI to use automatic schema loading and configuration
-  - Need to add Database Schema constraints to enforce BSON document conformity per collection
+  - Revamping MDBI to use automatic schema loading and configuration (_completed_)
+  - Need to add facilities for Database Schema constraints to enforce BSON document conformity per collection (_completed_)
+- Beta
+  - Determining new features list soon...
