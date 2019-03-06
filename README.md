@@ -1,6 +1,6 @@
 # rjs_mean
 
-This repository houses a server package meant to run on either a MEAN or MERN stack
+This repository houses a server package meant to run on either a MEAN or MERN stack. It comes fully equipped to run as either a Web Server or a RESTful API server, giving you the freedom to customize it to your needs.
 
 Current Version: v0.1.0 (Beta)
 
