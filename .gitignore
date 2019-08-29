@@ -69,6 +69,7 @@ log/*
 # Ignore personal files
 sql/*
 rj_todo.txt
+autoloader_ignore.json
 util/exports/__*f
 
 # Ignore credential files (i.e. have the user create their own credentials)
