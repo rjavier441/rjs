@@ -28,8 +28,9 @@ var margs = minimist( process.argv.slice( 2 ) );			// acquire all args except "n
 var port = margs.port ? margs.port : margs.P ? margs.P : false;		// allow custom ports
 var handlerTag = { "src": "server" };
 var ssl_settings = {
-	"key": fs.readFileSync( ssl.prvkey ),
-	"cert": fs.readFileSync( ssl.cert ),
+	"key": fs.readFileSync( ssl.prvkey, 'utf8' ),
+	"cert": fs.readFileSync( ssl.cert, 'utf8' ),
+	"ca": fs.readFileSync( ssl.ca, 'utf8' ),
 	"passphrase": ssl.passphrase,
 	"requestCert": false,
 	"rejectUnauthorized": false
