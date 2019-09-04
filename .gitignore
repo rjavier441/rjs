@@ -71,6 +71,9 @@ sql/*
 rj_todo.txt
 autoloader_ignore.json
 util/exports/__*f
+util/common/trustStore/*.csr
+util/common/trustStore/*.key
+util/common/trustStore/*.crt
 
 # Ignore credential files (i.e. have the user create their own credentials)
 credentials.json
